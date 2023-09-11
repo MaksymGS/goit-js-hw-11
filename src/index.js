@@ -13,6 +13,7 @@ form.addEventListener('submit', handlerSearch);
 
 let searchQuery = '';
 let count = 0;
+let emptyArr = 0;
 function handlerSearch(evt) {
   evt.preventDefault();
   searchQuery = evt.currentTarget.elements.searchQuery.value;
@@ -29,6 +30,7 @@ function handlerSearch(evt) {
       }
       count = resp.data.totalHits - resp.data.hits.length;
       page = 1;
+      emptyArr = resp.data.hits.length;
       galleryCard.innerHTML = createMarkup(resp.data.hits);
       gallery.refresh();
 
@@ -49,11 +51,13 @@ function handlerLoadMore(entries) {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
       page += 1;
-      if (count < 0 && entry.isIntersecting) {
+      if (count <= 0 && entry.isIntersecting) {
         observer.unobserve(guard);
-        Notiflix.Notify.failure(
-          `We're sorry, but you've reached the end of search results.`
-        );
+        if (emptyArr !== 0) {
+          Notiflix.Notify.failure(
+            `We're sorry, but you've reached the end of search results.`
+          );
+        }
         return;
       }
       serviceSearch(page)
